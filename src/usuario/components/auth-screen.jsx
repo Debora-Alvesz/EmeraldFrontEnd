@@ -28,7 +28,7 @@ function InputField({ label, type, placeholder, value, onChange, icon }) {
 }
 
 // 🔹 Componente principal (ESTRUTURA TELA CHEIA SEMÂNTICA)
-export function AuthScreen() {
+export function AuthScreen({ onLoginSuccess }) {
   const [name, setName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
@@ -56,9 +56,17 @@ export function AuthScreen() {
 
       if (resposta.ok) {
         const usuarioLogado = await resposta.json();
-        alert("Login realizado com sucesso!");
-        console.log("Usuário autenticado:", usuarioLogado);
-        localStorage.setItem("usuarioId", usuarioLogado.id);
+        
+        // 1. Guarda no localStorage primeiro
+        localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+        
+        // 2. Imprime no console para o seu controle
+        console.log("Usuário autenticado com sucesso:", usuarioLogado);
+        
+        // 3. Muda de tela IMEDIATAMENTE
+        if (onLoginSuccess) {
+          onLoginSuccess(); 
+        }
       } else {
         alert("Erro ao fazer login: Credenciais inválidas.");
       }
@@ -68,11 +76,9 @@ export function AuthScreen() {
   };
 
   // ✅ FUNÇÃO DE CADASTRO
-const handleSignup = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     
-    // O seu DTO só aceita estas 3 chaves exatas. 
-    // Qualquer coisa a mais (como perfilId) pode fazer o Spring dar erro 400.
     const dadosCadastro = {
       nome: name,
       email: signupEmail,
@@ -90,7 +96,6 @@ const handleSignup = async (e) => {
         alert("Conta criada com sucesso!");
         setTab("login"); // Pula para a tela de login
       } else {
-        // Se cair aqui, o Java barrou (E-mail duplicado ou o Perfil 'USER' não foi achado)
         alert("Erro ao cadastrar. Verifique se o e-mail já existe ou se o perfil padrão está mapeado corretamente no banco.");
       }
     } catch (error) {
@@ -141,6 +146,7 @@ const handleSignup = async (e) => {
         
         <nav className="w-full max-w-[320px] bg-secondary p-1 rounded-full flex items-center justify-between border border-border/60 mb-6">
           <button
+            type="button"
             onClick={() => setTab("signup")}
             className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
               tab === "signup" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
@@ -149,6 +155,7 @@ const handleSignup = async (e) => {
             Cadastrar
           </button>
           <button
+            type="button"
             onClick={() => setTab("login")}
             className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
               tab === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
@@ -196,52 +203,51 @@ const handleSignup = async (e) => {
           )}
 
           {/* 🔹 FORMULÁRIO DE CADASTRO */}
-{tab === "signup" && (
-  <form onSubmit={handleSignup} className="space-y-4">
-    <InputField
-      label="Nome completo"
-      type="text"
-      placeholder="Marta Silva"
-      value={name}
-      onChange={(e) => setName(e.target.value)}
-      icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
-    />
+          {tab === "signup" && (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <InputField
+                label="Nome completo"
+                type="text"
+                placeholder="Marta Silva"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
+              />
 
-    <InputField
-      label="Endereço de e-mail"
-      type="email"
-      placeholder="voce@email.com"
-      value={signupEmail}
-      onChange={(e) => setSignupEmail(e.target.value)}
-      icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>}
-    />
+              <InputField
+                label="Endereço de e-mail"
+                type="email"
+                placeholder="voce@email.com"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>}
+              />
 
-    <div className="space-y-1">
-      <InputField
-        label="Senha"
-        type="password"
-        placeholder="Crie uma senha segura"
-        value={signupPassword}
-        onChange={(e) => setSignupPassword(e.target.value)}
-        icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
-      />
-      {/* ⚠️ Mensagem de validação dinâmica amigável */}
-      {signupPassword && signupPassword.length < 6 ? (
-        <p className="text-[11px] text-destructive font-medium flex items-center gap-1 pl-1 animate-pulse">
-          ❌ A senha precisa ter no mínimo 6 caracteres.
-        </p>
-      ) : signupPassword.length >= 6 ? (
-        <p className="text-[11px] text-primary font-medium flex items-center gap-1 pl-1">
-          ✅ Senha válida para o servidor.
-        </p>
-      ) : null}
-    </div>
+              <div className="space-y-1">
+                <InputField
+                  label="Senha"
+                  type="password"
+                  placeholder="Crie uma senha segura"
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
+                  icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+                />
+                {signupPassword && signupPassword.length < 6 ? (
+                  <p className="text-[11px] text-destructive font-medium flex items-center gap-1 pl-1 animate-pulse">
+                    ❌ A senha precisa ter no mínimo 6 caracteres.
+                  </p>
+                ) : signupPassword.length >= 6 ? (
+                  <p className="text-[11px] text-primary font-medium flex items-center gap-1 pl-1">
+                    ✅ Senha válida para o servidor.
+                  </p>
+                ) : null}
+              </div>
 
-    <button type="submit" className="w-full h-11 bg-primary hover:bg-primary/95 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors mt-2 cursor-pointer">
-      Criar conta
-    </button>
-  </form>
-)}
+              <button type="submit" className="w-full h-11 bg-primary hover:bg-primary/95 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors mt-2 cursor-pointer">
+                Criar conta
+              </button>
+            </form>
+          )}
         </div>
 
         <footer className="w-full flex justify-center gap-4 text-[11px] text-muted-foreground/70 select-none mt-6">
