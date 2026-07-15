@@ -1,6 +1,7 @@
 import { useState } from "react";
 // Importação baseada na árvore de pastas do seu projeto
 import { EmeraldLogo } from "../../infrastructure/components/EmeraldLogo";
+import { API_URL } from "../../infrastructure/config/api";
 
 // 🔹 Componente de input premium reutilizável com suporte a ícones
 function InputField({ label, type, placeholder, value, onChange, icon }) {
@@ -48,7 +49,7 @@ export function AuthScreen({ onLoginSuccess }) {
     };
 
     try {
-      const resposta = await fetch("http://localhost:8080/api/v1/usuarios/login", {
+      const resposta = await fetch(`${API_URL}/api/v1/usuarios/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosLogin),
@@ -86,7 +87,7 @@ export function AuthScreen({ onLoginSuccess }) {
     };
 
     try {
-      const resposta = await fetch("http://localhost:8080/api/v1/usuarios", {
+      const resposta = await fetch(`${API_URL}/api/v1/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosCadastro),
