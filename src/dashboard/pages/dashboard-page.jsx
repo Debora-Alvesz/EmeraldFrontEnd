@@ -6,6 +6,8 @@ import { SummaryCards } from "../components/summary-cards"
 import { CashflowChart } from "../components/cashflow-chart"
 import { CategoryChart } from "../components/category-chart"
 import { TransactionsTable } from "../components/transactions-table"
+import ContasPage from "../../conta/pages/contas-page.jsx"
+import AdminUsersPage from "./admin-users-page.jsx"
 
 export default function DashboardPage({ onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -31,7 +33,7 @@ export default function DashboardPage({ onLogout }) {
           {/* Cabeçalho do Painel */}
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
           
-          {/* 🔄 Renderização condicional: Só mostra os blocos se a aba for 'dashboard' */}
+          {/* 🔄 Renderização condicional: Exibe cada tela de acordo com a aba selecionada */}
           {currentTab === "dashboard" ? (
             <>
               {/* Cards de Resumo Operacional */}
@@ -46,6 +48,10 @@ export default function DashboardPage({ onLogout }) {
               {/* Histórico/Tabela de Movimentações */}
               <TransactionsTable />
             </>
+          ) : currentTab === "contas" ? (
+            <ContasPage />
+          ) : currentTab === "usuarios-admin" ? (
+            <AdminUsersPage />
           ) : (
             /* 🖥️ Placeholder para as próximas telas (Transações, Metas, Perfil, etc) */
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed border-gray-200 rounded-2xl bg-white p-8 text-center shadow-sm">
@@ -53,7 +59,7 @@ export default function DashboardPage({ onLogout }) {
                 Tela de {currentTab}
               </p>
               <p className="text-sm text-gray-400 mt-1 max-w-xs">
-                Esta seção está pronta para ser integrada aos controllers correspondentes do seu backend Java.
+                Esta seção está pronta para ser integrada.
               </p>
             </div>
           )}

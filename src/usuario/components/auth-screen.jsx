@@ -60,9 +60,19 @@ export function AuthScreen({ onLoginSuccess }) {
         
         // 1. Guarda no localStorage primeiro
         localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+        const usuarioId =
+          usuarioLogado?.id ||
+          usuarioLogado?.usuarioId ||
+          usuarioLogado?.idUsuario ||
+          usuarioLogado?.usuario?.id ||
+          usuarioLogado?.usuario?.usuarioId ||
+          "";
+        if (usuarioId) {
+          localStorage.setItem("usuarioId", String(usuarioId));
+        }
         
         // 2. Imprime no console para o seu controle
-        console.log("Usuário autenticado com sucesso:", usuarioLogado);
+        console.log("Usuário autenticado com sucesso:", usuarioLogado, { usuarioId });
         
         // 3. Muda de tela IMEDIATAMENTE
         if (onLoginSuccess) {
