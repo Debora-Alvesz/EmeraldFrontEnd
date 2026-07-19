@@ -36,8 +36,14 @@
 }
 
 .resumo-card {
-  overflow: hidden;
   border-radius: 1.5rem;
+  /* CORREÇÃO: "overflow: hidden" cortava qualquer conteúdo que
+     ultrapassasse a altura do card (foi o que fazia a legenda com
+     os 4 tipos de conta sumir de vez em quando). Como não há mais
+     nenhum elemento aqui que dependa do corte para cantos arredondados,
+     trocamos para "visible" — os cantos continuam arredondados normalmente
+     porque o card não tem fundo/imagem "vazando" pra fora dele. */
+  overflow: visible;
 }
 
 .resumo-card__conteudo {
@@ -90,6 +96,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+  /* Garante um respiro entre a barra e a legenda, para os dois
+     nunca parecerem "grudados" ou sobrepostos. */
+  margin-top: 0.25rem;
 }
 
 .composicao__legenda-item {
@@ -98,6 +107,9 @@
   gap: 0.5rem;
   color: var(--muted-foreground);
   font-size: 0.875rem;
+  /* CORREÇÃO: sem isso, dentro de um flex container apertado o item
+     podia encolher e "espremer" a bolinha de cor até ela sumir. */
+  flex-shrink: 0;
 }
 
 .composicao__dot {
@@ -105,6 +117,9 @@
   display: inline-block;
   height: 0.75rem;
   width: 0.75rem;
+  /* CORREÇÃO: mesma ideia acima — impede a bolinha de encolher e
+     ficar invisível quando a legenda quebra linha (flex-wrap). */
+  flex-shrink: 0;
 }
 
 .contas-grid {
@@ -116,6 +131,12 @@
 .modal-conta {
   width: 100%;
   max-width: 40rem;
+  /* CORREÇÃO: o Dialog (shadcn) costuma vir com "overflow: hidden"
+     para manter os cantos arredondados. Isso corta qualquer menu
+     (como o do Select "Tipo de conta") que precise abrir para além
+     dos limites do modal. Forçamos "visible" aqui para o dropdown
+     conseguir se expandir e mostrar todas as opções. */
+  overflow: visible;
 }
 
 .modal-conta__form {
@@ -139,6 +160,11 @@
 
 .sheet-extrato {
   min-height: 100vh;
+  /* CORREÇÃO: sem uma largura máxima, o painel lateral (Sheet) tende
+     a ocupar a tela inteira em vez de ficar como um painel estreito
+     deslizando pela lateral. width:100% + max-width trava isso. */
+  width: 100%;
+  max-width: 28rem;
 }
 
 .extrato-filtros {
@@ -250,3 +276,12 @@
 .cor-poupanca { background: #0ea5e9 !important; }
 .cor-investimento { background: #6b7280 !important; }
 .cor-especie { background: #f59e0b !important; }
+
+/* CORREÇÃO: garante que o menu suspenso do Select (Radix/shadcn) sempre
+   consiga mostrar todas as opções — se a lista for maior que o espaço
+   disponível na tela, ele passa a rolar em vez de cortar as últimas
+   opções (foi isso que escondia "Investimento" e "Dinheiro em Espécie"). */
+[data-radix-select-content] {
+  max-height: 300px;
+  overflow-y: auto;
+}

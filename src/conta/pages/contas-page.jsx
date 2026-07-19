@@ -14,6 +14,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import axios from "axios"; // 🔌 Cliente HTTP para conexão com o backend Java
 import {
+  ArrowLeft, 
   Plus,
   Wallet,
   Landmark,
@@ -43,10 +44,10 @@ import "./contas-page.css";
 // usadas tanto na barra de composição quanto na legenda, para as cores
 // nunca ficarem desencontradas entre os dois lugares.
 const TIPOS_CONTA = [
-  { value: "CORRENTE", label: "Corrente", icon: Landmark, cor: "cor-corrente" },
-  { value: "POUPANCA", label: "Poupança", icon: PiggyBank, cor: "cor-poupanca" },
-  { value: "INVESTIMENTO", label: "Investimento", icon: TrendingUp, cor: "cor-investimento" },
-  { value: "ESPECIE", label: "Dinheiro em Espécie", icon: Wallet, cor: "cor-especie" },
+  { value: "CORRENTE", label: "Corrente", icon: Landmark, corClasse: "bg-[#10B981]" }, // Esmeralda
+  { value: "POUPANCA", label: "Poupança", icon: PiggyBank, corClasse: "bg-[#3B82F6]" }, // Azul
+  { value: "INVESTIMENTO", label: "Investimento", icon: TrendingUp, corClasse: "bg-[#8B5CF6]" }, // Roxo
+  { value: "ESPECIE", label: "Dinheiro em Espécie", icon: Wallet, corClasse: "bg-[#F59E0B]" }, // Âmbar
 ];
 
 const MESES = [
@@ -321,27 +322,38 @@ export default function ContasPage() {
               </p>
             </div>
 
-            {/* Composição por tipo de conta: barra + legenda com cor/rótulo */}
+            {/* Composição por tipo de conta: barra + legenda com cor/rótulo.
+                A legenda abaixo sempre mostra os 4 tipos (mesmo com saldo
+                zero), então ela não depende de haver saldo pra aparecer —
+                se ela sumir, o problema é de layout/corte, não de dados. */}
             <div className="composicao">
               <div className="composicao__titulo">
                 <Layers className="h-3.5 w-3.5" />
                 Composição por tipo de conta
               </div>
 
-              <div className="composicao__barra">
+          <div className="composicao__barra flex h-2.5 w-full overflow-hidden rounded-full bg-muted/20">
                 {TIPOS_CONTA.map((tipo) => {
                   const valor = distribuicaoPorTipo[tipo.value] || 0;
-                  // Guarda contra divisão por zero quando ainda não há saldo algum
                   const percentual = saldoTotal > 0 ? (valor / saldoTotal) * 100 : 0;
                   if (percentual <= 0) return null;
                   return (
                     <div
                       key={tipo.value}
-                      className={`h-full ${tipo.cor}`}
+                      className={`h-full ${tipo.corClasse}`}
                       style={{ width: `${percentual}%` }}
                     />
                   );
                 })}
+              </div>
+
+              <div className="composicao__legenda mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground">
+                {TIPOS_CONTA.map((tipo) => (
+                  <span key={tipo.value} className="flex items-center gap-1.5">
+                    <span className={`h-2 w-2 flex-shrink-0 rounded-full ${tipo.corClasse}`} />
+                    {tipo.label}
+                  </span>
+                ))}
               </div>
 
               {/* Legenda: sempre mostra os 4 tipos, mesmo com saldo zero,
@@ -382,30 +394,29 @@ export default function ContasPage() {
         </section>
       </div>
 
-      {/* Modal de cadastro/edição — largura maior (max-w-xl) para o Select
-          de "Tipo de conta" não ficar espremido/cortado */}
+  {/* Modal de cadastro/edição */}
       <Dialog open={modalAberto} onOpenChange={(aberto) => (aberto ? null : fecharModal())}>
-        <DialogContent className="modal-conta">
-          <DialogHeader>
+            <DialogContent className="sm:max-w-xl p-6 bg-card border-border rounded-2xl overflow-visible z-50">
+            <DialogHeader>
             <DialogTitle>{contaEmEdicao ? "Editar Conta" : "Nova Conta"}</DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Os dados modificados aqui serão persistidos diretamente no seu banco de dados relacional.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmitFormulario} className="modal-conta__form">
-            <div className="form-field">
+          <form onSubmit={handleSubmitFormulario} className="mt-4 space-y-5">
+            <div className="space-y-2">
               <Label htmlFor="nomeConta">Nome da conta</Label>
               <Input
                 id="nomeConta"
                 placeholder="Ex.: Nubank, Carteira..."
                 value={formData.nomeConta}
                 onChange={(e) => setFormData((prev) => ({ ...prev, nomeConta: e.target.value }))}
-                className="form-input"
+                className="h-11 rounded-lg"
               />
             </div>
 
-            <div className="form-field">
+            <div className="space-y-2">
               <Label htmlFor="saldo">Saldo inicial (R$)</Label>
               <Input
                 id="saldo"
@@ -413,43 +424,49 @@ export default function ContasPage() {
                 step="0.01"
                 placeholder="0,00"
                 value={formData.saldo}
-                // Em edição o saldo não é digitado livremente: ele deve mudar
-                // através de lançamentos (extrato), não por edição direta,
-                // para manter o histórico e a soma sempre consistentes.
                 disabled={!!contaEmEdicao}
                 onChange={(e) => setFormData((prev) => ({ ...prev, saldo: e.target.value }))}
-                className="form-input"
+                className="h-11 rounded-lg"
               />
             </div>
 
-            <div className="form-field">
+            <div className="space-y-2">
               <Label htmlFor="tipoConta">Tipo de conta</Label>
               <Select
                 value={formData.tipoConta}
                 onValueChange={(valor) => setFormData((prev) => ({ ...prev, tipoConta: valor }))}
               >
-                <SelectTrigger id="tipoConta" className="form-input">
+                <SelectTrigger id="tipoConta" className="h-11 rounded-lg">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  {/* As 4 opções do Enum do backend: Corrente, Poupança,
-                      Investimento e Dinheiro em Espécie */}
-                  {TIPOS_CONTA.map((tipo) => (
-                    <SelectItem key={tipo.value} value={tipo.value}>
-                      {tipo.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+              <SelectContent 
+                side="bottom" 
+                className="z-[100] bg-card border-border"
+              >
+                {TIPOS_CONTA.map((tipo) => (
+                  <SelectItem key={tipo.value} value={tipo.value}>  
+                    {tipo.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
               </Select>
             </div>
 
-            {erroForm && <p className="form-erro">{erroForm}</p>}
+            {erroForm && <p className="text-sm font-medium text-destructive">{erroForm}</p>}
 
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="ghost" onClick={fecharModal} className="rounded-lg">
+            <DialogFooter className="pt-4 flex flex-col sm:flex-row sm:justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={fecharModal}
+                className="h-11 px-5 rounded-xl font-medium w-full sm:w-auto"
+              >
                 Cancelar
               </Button>
-              <Button type="submit" className="btn-nova-conta rounded-lg">
+              <Button
+                type="submit"
+                className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 w-full sm:w-auto"
+              >
                 {contaEmEdicao ? "Salvar alterações" : "Cadastrar conta"}
               </Button>
             </DialogFooter>
@@ -457,90 +474,114 @@ export default function ContasPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Painel lateral de extrato mensal */}
+     {/* Painel lateral de extrato mensal. */}
       <Sheet open={extratoAberto} onOpenChange={setExtratoAberto}>
-        <SheetContent className="sheet-extrato">
+        {/* 
+          AJUSTES DE RESPONSIVIDADE:
+          - w-full: No celular (telas pequenas), o painel ocupa 100% da largura.
+          - sm:max-w-md: Em telas médias/grandes, ele trava na largura de uma gaveta (max 448px).
+          - flex flex-col h-full: Transforma o painel numa coluna de altura total, 
+            permitindo que o cabeçalho fique fixo no topo e apenas a lista role.
+          - p-4 sm:p-6: Padding menor no celular para aproveitar espaço, maior no desktop.
+        */}
+        <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-4 sm:p-6 bg-card border-border shadow-2xl z-50">
           {contaSelecionada && (
             <>
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <Receipt className="h-4.5 w-4.5 text-primary" />
-                  Extrato — {contaSelecionada.nomeConta}
-                </SheetTitle>
-                <SheetDescription className="text-muted-foreground">
-                  Consome em tempo real os registros vinculados à chave primária desta conta.
-                </SheetDescription>
-              </SheetHeader>
+              {/* CABEÇALHO COM BOTÃO VOLTAR */}
+              <div className="flex items-start gap-3">
+                {/* Botão Voltar: Visível no mobile e desktop, ótimo para UX */}
+                <button 
+                  onClick={() => setExtratoAberto(false)}
+                  className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                  aria-label="Voltar e fechar painel"
+                >
+                  <ArrowLeft className="h-4.5 w-4.5" />
+                </button>
 
-              <div className="extrato-filtros">
-                <div className="form-field">
-                  <Label className="text-xs text-muted-foreground">Mês de Análise</Label>
-                  <Select
-                    value={filtroMes}
-                    onValueChange={(v) => {
-                      setFiltroMes(v);
-                      // Recarrega o extrato imediatamente ao trocar o mês
-                      carregarExtratoDaAPI(contaSelecionada.id, v, filtroAno);
-                    }}
-                  >
-                    <SelectTrigger className="form-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card">
-                      {MESES.map((mes) => (
-                        <SelectItem key={mes.value} value={mes.value}>
-                          {mes.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="form-field">
-                  <Label className="text-xs text-muted-foreground">Ano de Análise</Label>
-                  <Input
-                    type="number"
-                    value={filtroAno}
-                    className="form-input"
-                    onChange={(e) => {
-                      setFiltroAno(e.target.value);
-                      // Só refaz a busca quando o ano tiver 4 dígitos completos
-                      if (e.target.value.length === 4) {
-                        carregarExtratoDaAPI(contaSelecionada.id, filtroMes, e.target.value);
-                      }
-                    }}
-                  />
-                </div>
+                {/* sheet-header nativo reajustado para alinhar à esquerda ao lado do botão */}
+                <SheetHeader className="text-left flex-1 mt-0">
+                  <SheetTitle className="flex items-center gap-2 text-xl">
+                    <Receipt className="h-5 w-5 text-primary shrink-0" />
+                    <span className="truncate">{contaSelecionada.nomeConta}</span>
+                  </SheetTitle>
+                  <SheetDescription className="text-sm text-muted-foreground mt-1">
+                    Consome em tempo real os registros vinculados à chave primária desta conta.
+                  </SheetDescription>
+                </SheetHeader>
               </div>
 
-              <div className="mt-6">
-                {linhasExtrato.length === 0 ? (
-                  <div className="empty-state empty-state--extrato">
-                    <Inbox className="h-8 w-8 text-muted-foreground/60" />
-                    <p className="mt-3 text-sm font-medium text-muted-foreground">
-                      Nenhum registro retornado pelo Service
-                    </p>
-                    <p className="mt-1 max-w-xs text-xs text-muted-foreground/80">
-                      Nota: o método obterExtratoMensal() na classe Java precisa
-                      realizar o mapeamento físico na tabela de transações.
-                    </p>
+              {/* ÁREA ROLÁVEL: Garante que os filtros e a lista rolem, mas o topo fique fixo */}
+              <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-6">
+                
+                {/* Filtros em Grid - Adaptável */}
+                <div className="extrato-filtros grid grid-cols-2 gap-3">
+                  <div className="form-field flex flex-col gap-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Mês de Análise</Label>
+                    <Select
+                      value={filtroMes}
+                      onValueChange={(v) => {
+                        setFiltroMes(v);
+                        carregarExtratoDaAPI(contaSelecionada.id, v, filtroAno);
+                      }}
+                    >
+                      <SelectTrigger className="h-10 rounded-lg bg-background border-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      {/* position="popper" garante que não vai bugar no mobile */}
+                      <SelectContent position="popper" className="z-[100] max-h-64 bg-card border-border">
+                        {MESES.map((mes) => (
+                          <SelectItem key={mes.value} value={mes.value}>
+                            {mes.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <ul className="extrato-lista">
-                    {/* O backend ainda retorna cada lançamento como texto simples;
-                        por isso usamos String(linha) até o DTO de extrato existir */}
-                    {linhasExtrato.map((linha, index) => (
-                      <li key={index} className="extrato-item">
-                        <div className="flex items-center gap-3">
-                          <span className="extrato-item__icone bg-muted">
-                            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                          </span>
-                          <p className="text-sm font-medium text-foreground">{String(linha)}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+
+                  <div className="form-field flex flex-col gap-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Ano de Análise</Label>
+                    <Input
+                      type="number"
+                      value={filtroAno}
+                      className="h-10 rounded-lg bg-background border-input"
+                      onChange={(e) => {
+                        setFiltroAno(e.target.value);
+                        if (e.target.value.length === 4) {
+                          carregarExtratoDaAPI(contaSelecionada.id, filtroMes, e.target.value);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Lista de Resultados */}
+                <div>
+                  {linhasExtrato.length === 0 ? (
+                    <div className="empty-state empty-state--extrato flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-border bg-muted/30">
+                      <Inbox className="h-8 w-8 text-muted-foreground/60" />
+                      <p className="mt-3 text-sm font-medium text-muted-foreground text-center">
+                        Nenhum registro retornado
+                      </p>
+                      <p className="mt-1 max-w-[200px] text-xs text-muted-foreground/80 text-center">
+                        O método Java precisa realizar o mapeamento físico.
+                      </p>
+                    </div>
+                  ) : (
+                    <ul className="extrato-lista divide-y divide-border rounded-xl border border-border bg-background overflow-hidden">
+                      {linhasExtrato.map((linha, index) => (
+                        <li key={index} className="extrato-item flex items-center justify-between gap-3 px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <span className="extrato-item__icone flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                            </span>
+                            <p className="text-sm font-medium text-foreground">{String(linha)}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                
               </div>
             </>
           )}

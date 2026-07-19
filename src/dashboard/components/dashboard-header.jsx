@@ -40,18 +40,8 @@ export function DashboardHeader({ onMenuClick }) {
         <p className="text-base font-semibold text-gray-900 capitalize">{userName}</p>
       </div>
 
-      {/* Ações da Direita: Notificação e Avatar */}
+      {/* Ações da Direita: Avatar */}
       <div className="flex items-center gap-4">
-        <button
-          className="relative rounded-full p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-500 transition-colors cursor-pointer"
-          aria-label="Ver notificações"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500" />
-        </button>
-
-        <div className="h-px w-4 bg-gray-200" />
-
         {/* Bloco do Perfil / Avatar */}
         <div className="flex items-center gap-3">
           {/* Círculo com a Inicial dinâmica consertada! */}

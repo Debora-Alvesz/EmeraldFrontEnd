@@ -37,7 +37,7 @@ export function AuthScreen({ onLoginSuccess }) {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  const [tab, setTab] = useState("signup"); // Inicia na aba de cadastro
+  const [tab, setTab] = useState("login"); // Inicia na aba de login (Entrar)
 
   // ✅ FUNÇÃO DE LOGIN
   const handleLogin = async (e) => {
