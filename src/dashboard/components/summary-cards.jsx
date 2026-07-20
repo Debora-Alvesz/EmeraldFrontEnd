@@ -27,7 +27,8 @@ export function SummaryCards() {
     receitas: 0.0,
     despesas: 0.0,
     saldoTotal: 0.0,
-    metasAtingidas: "0 de 0"
+    metasAtingidas: "0 de 0",
+    statusSemaforo: "ok" // 🚦 ESTADO DO SEMÁFORO: ok, atencao, estourado
   });
   
   const [carregando, setCarregando] = useState(true);
@@ -42,7 +43,6 @@ export function SummaryCards() {
       try {
         setCarregando(true);
         
-        // Execução concorrente das requisições para os controllers corretos
         const [respostaContas, respostaTransacoes, respostaMetas] = await Promise.all([
           axios.get(`http://localhost:8080/api/v1/contas-bancarias/usuario/${usuarioId}`),
           axios.get(`http://localhost:8080/api/v1/transacoes/usuario/${usuarioId}`),
@@ -53,11 +53,10 @@ export function SummaryCards() {
         const transacoes = respostaTransacoes.data || [];
         const metas = respostaMetas.data || [];
 
-        // 1. Consolidação do Saldo Total (ContaBancariaResponseDTO)
+        // 1. Consolidação do Saldo Total
         const saldoCalculado = contas.reduce((soma, conta) => soma + Number(conta.saldo || 0), 0);
 
-        // 2. Consolidação das Receitas e Despesas (TransacaoResponseDTO)
-        // Regra de negócio: Valores > 0 representam receitas, < 0 representam despesas.
+        // 2. Consolidação das Receitas e Despesas
         const totalReceitas = transacoes
           .filter(t => Number(t.valor || 0) > 0)
           .reduce((soma, t) => soma + Number(t.valor || 0), 0);
@@ -66,17 +65,52 @@ export function SummaryCards() {
           .filter(t => Number(t.valor || 0) < 0)
           .reduce((soma, t) => soma + Math.abs(Number(t.valor || 0)), 0);
 
-        // 3. Consolidação das Metas Financeiras (MetaFinanceiraResponseDTO)
-        // O DTO atual expõe os limites, mas não o progresso individual.
-        // O valor de metas concluídas permanecerá estático até a evolução do DTO.
-        const totalMetas = metas.length;
-        const metasConcluidas = 0; 
+        // 3. Consolidação com Regra do Semáforo Inteligente
+        const d = new Date();
+        const mesAnoAtualStr = `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+
+        const metasDoMes = metas.filter(m => m.mesAno === mesAnoAtualStr);
+        const totalMetasDoMes = metasDoMes.length;
+        
+        let categoriasSobControle = 0;
+        let piorStatusDoMes = "ok"; // Cascata de gravidade inicial
+
+        metasDoMes.forEach(meta => {
+          const catId = meta.categoriaId || meta.categoria?.id;
+
+          const gastoTotalNaCategoria = transacoes
+            .filter(t => {
+              const tCatId = t.categoriaId || t.categoria?.id;
+              if (tCatId !== catId || Number(t.valor || 0) >= 0) return false;
+              const tDate = t.data || t.dataHora;
+              if (!tDate) return false;
+              const [ano, mes] = tDate.split('-');
+              return `${mes}/${ano.substring(0, 4)}` === mesAnoAtualStr;
+            })
+            .reduce((soma, t) => soma + Math.abs(Number(t.valor || 0)), 0);
+
+          // 📐 CÁLCULO DE PROGRESSO PARA O SEMÁFORO
+          const limite = Number(meta.valorLimite || 0);
+          const percentualConsumido = limite > 0 ? (gastoTotalNaCategoria / limite) * 100 : 0;
+
+          // Avaliação da gravidade do orçamento individual
+          if (percentualConsumido >= 100) {
+            piorStatusDoMes = "estourado"; // Vermelho atropela qualquer aviso anterior
+          } else if (percentualConsumido >= 80 && piorStatusDoMes !== "estourado") {
+            piorStatusDoMes = "atencao";   // Amarelo assume se não houver vermelho
+          }
+
+          if (gastoTotalNaCategoria <= limite) {
+            categoriasSobControle++;
+          }
+        });
 
         setFinanceData({
           receitas: totalReceitas,
           despesas: totalDespesas,
           saldoTotal: saldoCalculado,
-          metasAtingidas: `${metasConcluidas} de ${totalMetas}`
+          metasAtingidas: `${categoriasSobControle} de ${totalMetasDoMes}`,
+          statusSemaforo: totalMetasDoMes === 0 ? "ok" : piorStatusDoMes
         });
         
       } catch (error) {
@@ -89,14 +123,32 @@ export function SummaryCards() {
     buscarDadosDoDashboard();
   }, [usuarioId]);
 
-  /**
-   * Formata valores numéricos para o padrão monetário BRL (Real Brasileiro).
-   * @param {number} valor - Valor numérico a ser formatado.
-   * @returns {string} String formatada (ex: R$ 1.500,00).
-   */
   const formatarMoeda = (valor) => {
     return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
+
+  // 🎨 CONFIGURADOR DINÂMICO DO SEMÁFORO (Padrão de Cores Emerald Light Premium)
+  const obterConfigSemaforo = (status) => {
+    switch (status) {
+      case "estourado":
+        return {
+          classe: "bg-rose-50 text-[#E11D48]",
+          descricao: "Aviso crítico: Limite ultrapassado!"
+        };
+      case "atencao":
+        return {
+          classe: "bg-amber-50 text-[#D97706]",
+          descricao: "Atenção: Teto de gastos acima de 80%"
+        };
+      default:
+        return {
+          classe: "bg-emerald-50 text-[#059669]",
+          descricao: "Excelente: Orçamentos sob controle"
+        };
+    }
+  };
+
+  const semaforoMeta = obterConfigSemaforo(financeData.statusSemaforo);
 
   const cards = [
     { 
@@ -121,11 +173,11 @@ export function SummaryCards() {
       descricao: "Acumulado de todas as contas"
     },
     { 
-      label: "Metas Atingidas", 
+      label: "Categorias Sob Controle", 
       value: financeData.metasAtingidas, 
       icon: Target, 
-      iconClass: "bg-purple-50 text-purple-600",
-      descricao: "Progresso dos objetivos atuais"
+      iconClass: semaforoMeta.classe, // 🚦 Ícone muda dinamicamente (Verde, Amarelo ou Vermelho)
+      descricao: semaforoMeta.descricao // 📝 Texto auxiliar contextualizado com a saúde financeira
     },
   ];
 

@@ -408,9 +408,9 @@ export default function TransacoesPage() {
                       </td>
                       <td className="right" data-label="Valor">
                         <span className={`value-flow figure ${entrada ? 'in' : 'out'}`}>
-                          <span className={`flow-icon ${entrada ? 'in' : 'out'}`}>{entrada ? '↑' : '↓'}</span>
-                          {entrada ? '+' : '−'} {fmtMoeda(t.valor)}
-                        </span>
+                        <span className={`flow-icon ${entrada ? 'in' : 'out'}`}>{entrada ? '↑' : '↓'}</span>
+                        {fmtMoeda(Math.abs(t.valor))}
+                      </span>
                       </td>
                       <td className="right" data-label="Ações">
                         <span className="row-actions">

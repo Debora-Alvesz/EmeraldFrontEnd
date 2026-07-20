@@ -9,6 +9,7 @@ import { TransactionsTable } from "../components/transactions-table"
 import ContasPage from "../../conta/pages/contas-page.jsx"
 import TransacoesPage from "../../transacoes/pages/transacoesPage.jsx"
 import AdminUsersPage from "./admin-users-page.jsx"
+import MetasPage from "../../metafinanceira/pages/MetasPage.jsx"
 
 export default function DashboardPage({ onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -53,10 +54,13 @@ export default function DashboardPage({ onLogout }) {
             <ContasPage />
           ) : currentTab === "categorias" ? (
             <TransacoesPage />
+          ) : currentTab === "metas" ? (
+            /* 🎯 NOVA TELA DE METAS RENDERIZADA AQUI */
+            <MetasPage />
           ) : currentTab === "usuarios-admin" ? (
             <AdminUsersPage />
           ) : (
-            /* 🖥️ Placeholder para as próximas telas (Metas, Perfil, etc) */
+            /* 🖥️ Placeholder para as próximas telas (Perfil, etc) */
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed border-gray-200 rounded-2xl bg-white p-8 text-center shadow-sm">
               <p className="text-base font-semibold text-gray-800 capitalize">
                 Tela de {currentTab}

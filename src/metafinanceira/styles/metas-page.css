@@ -1,0 +1,430 @@
+/* ============================================================
+   EMERALD — Metas Financeiras (Tema Light Premium Executivo)
+   Consome as variáveis globais (:root) do dashboard
+   ============================================================ */
+
+.metas-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* ============================================================
+   1. CABEÇALHO
+   ============================================================ */
+
+.metas-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem;
+}
+
+.metas-header__titulo {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem;
+  color: var(--foreground);
+}
+
+.metas-header__subtitulo {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin: 0;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primario {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
+}
+
+.btn--primario:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.btn--secundario {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.btn--secundario:hover {
+  background-color: var(--muted);
+}
+
+.btn__icone {
+  display: inline-flex;
+}
+
+/* ============================================================
+   2. PAINEL / GRID DE METAS
+   ============================================================ */
+
+.metas-painel__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.metas-painel__titulo {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.metas-painel__periodo {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.metas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
+}
+
+.metas-grid__vazio {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background-color: var(--card);
+  color: var(--muted-foreground);
+}
+
+/* ---- Card de meta ---- */
+
+.meta-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Sombra super sutil e corporativa */
+  transition: all 0.2s ease;
+}
+
+.meta-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.meta-card__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.meta-card__categoria {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-card__categoria-icone {
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  border-radius: 6px;
+}
+
+.meta-card__categoria-nome {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.meta-card__periodo {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  background-color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.meta-card__valores {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+}
+
+.meta-card__valor-limite {
+  color: var(--muted-foreground);
+}
+
+.meta-card__valor-gasto {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Barra de progresso */
+
+.meta-card__progresso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.progresso-barra {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--muted);
+  overflow: hidden;
+}
+
+.progresso-barra__preenchimento {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--primary);
+  transition: width 0.4s ease;
+}
+
+.progresso-barra__preenchimento--atencao {
+  background-color: #f59e0b; /* Amarelo/Laranja de atenção padrão */
+}
+
+.progresso-barra__preenchimento--estourado {
+  background-color: var(--destructive); /* Vermelho definido nos tokens */
+}
+
+.progresso-barra__porcentagem {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  align-self: flex-end;
+}
+
+/* Rodapé do card: badge + ações */
+
+.meta-card__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.meta-card__badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.meta-card__badge--ok {
+  background-color: var(--secondary); /* Fundo verde suave */
+  color: var(--secondary-foreground);
+}
+
+.meta-card__badge--atencao {
+  background-color: #fef3c7; /* Fundo âmbar suave */
+  color: #b45309; /* Texto âmbar escuro */
+}
+
+.meta-card__badge--estourado {
+  background-color: #ffe4e6; /* Fundo Rose suave */
+  color: var(--destructive);
+}
+
+.meta-card__acoes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.icone-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icone-btn:hover {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.icone-btn--editar:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.icone-btn--excluir:hover {
+  background-color: #ffe4e6;
+  color: var(--destructive);
+}
+
+/* ============================================================
+   3. MODAL — CONFIGURAR META
+   ============================================================ */
+
+.modal-meta {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  padding: 0;
+  width: min(420px, 92vw);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-meta::backdrop {
+  background-color: rgba(17, 24, 39, 0.5); /* Cinza escuro translúcido */
+  backdrop-filter: blur(2px);
+}
+
+.modal-meta__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-meta__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-meta__titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.modal-meta__fechar {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.modal-meta__fechar:hover {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.modal-meta__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.campo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.campo-form__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.campo-form__select,
+.campo-form__input {
+  background-color: var(--card);
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) * 0.8); /* Equivalente a radius-md */
+  color: var(--foreground);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.campo-form__select:focus,
+.campo-form__input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px var(--secondary); /* Foco suave esmeralda */
+}
+
+.modal-meta__rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background-color: var(--background); /* Fundo sutilmente diferente no rodapé */
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+/* ============================================================
+   Responsivo
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .metas-page {
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .metas-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .metas-grid {
+    grid-template-columns: 1fr;
+  }
+}

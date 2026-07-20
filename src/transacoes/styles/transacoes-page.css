@@ -1,5 +1,3 @@
-/* Importação das fontes do Google via CDN */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
 
 /* Definição do tema em variáveis no root para facilitar manutenção e modo dark */
 :root {
@@ -25,19 +23,19 @@
   max-width: 1120px; 
   margin: 0 auto; 
   padding: 24px 20px 60px; 
-  font-family: 'Inter', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 /* Tipografia de cabeçalhos e elementos monetários */
 h1, h2, h3, .heading { 
-  font-family: 'Space Grotesk', sans-serif; 
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
   letter-spacing: -0.01em; 
   margin: 0; 
 }
 
 .figure { 
-  font-family: 'JetBrains Mono', monospace; 
-  font-variant-numeric: tabular-nums; 
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+  font-variant-numeric: tabular-nums;
 }
 
 /* Alinhamento e visual do cabeçalho principal */
@@ -119,10 +117,10 @@ header.top p {
   font-size: 14px; 
 }
 
-/* Divide as listagens esquerdas da tabela central */
+/* Distribuição das listagens esquerdas da tabela central (Ajustado para 190px) */
 .layout { 
   display: grid; 
-  grid-template-columns: 240px 1fr; 
+  grid-template-columns: 190px 1fr; 
   gap: 20px; 
   align-items: start; 
 }
@@ -173,14 +171,40 @@ aside .row h2 { font-size: 14px; display: flex; align-items: center; gap: 6px; }
 }
 .cat-item:hover { background: var(--card-hover); }
 .cat-item.active { background: var(--primary-soft); border-color: var(--primary); }
-.cat-item .left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+.cat-item .left { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  min-width: 0; 
+  flex: 1; /* Garante que o texto ocupe todo o espaço enquanto não há hover */
+}
 .cat-item .dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
-.cat-item .name { font-size: 13px; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.cat-item .name { 
+  font-size: 13px; 
+  color: var(--muted-foreground); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  width: 100%;
+}
 .cat-item.active .name { color: var(--foreground); font-weight: 600; }
 
-/* Ações secundárias que só aparecem ao passar o mouse */
-.cat-item .actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s ease; }
-.cat-item:hover .actions { opacity: 1; }
+/* 🛠️ ENGENHARIA DE HOVER DINÂMICO: Abrevia o texto somente quando o mouse entra */
+.cat-item .actions { 
+  display: flex; 
+  gap: 4px; 
+  max-width: 0; /* Começa zerado para o nome se expandir "até onde dá" */
+  opacity: 0; 
+  overflow: hidden;
+  transition: max-width 0.2s ease, opacity 0.15s ease; 
+}
+.cat-item:hover .actions { 
+  max-width: 60px; /* Abre espaço suficiente para as ações e força o texto a abreviar */
+  opacity: 1; 
+}
+
 .cat-item .actions button {
   width: 22px; 
   height: 22px; 
@@ -190,8 +214,9 @@ aside .row h2 { font-size: 14px; display: flex; align-items: center; gap: 6px; }
   color: var(--muted-foreground); 
   font-size: 13px; 
   border-radius: 6px;
+  flex-shrink: 0;
 }
-.cat-item .actions button:hover { background: rgba(255, 255, 255, 0.05); color: var(--foreground); }
+.cat-item .actions button:hover { background: rgba(0, 0, 0, 0.05); color: var(--foreground); }
 .cat-item .actions button.del { color: var(--expense); }
 
 /* Tabela de lançamentos que centraliza a tela principal */
@@ -228,7 +253,11 @@ aside .row h2 { font-size: 14px; display: flex; align-items: center; gap: 6px; }
 
 /* Estilização padrão da estrutura em grades da tabela */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* 📌 SEÇÃO DO ROLLER WEB: Removido o scroll horizontal para fluir nativamente no Desktop */
+.table-scroll { 
+  overflow: visible; 
+}
 
 thead th {
   text-align: left; 
@@ -260,12 +289,39 @@ td.right { text-align: right; }
 .badge .dot { width: 6px; height: 6px; border-radius: 999px; }
 
 /* Cores contextuais verde e vermelho baseadas se a transação é receita/despesa */
-.value-flow { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-.flow-icon { width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
-.flow-icon.in { background: var(--income-soft); color: var(--income); }
-.flow-icon.out { background: var(--expense-soft); color: var(--expense); }
-.value-flow.in { color: var(--income); }
-.value-flow.out { color: var(--expense); }
+.value-flow {
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: space-between;
+  gap: 8px; 
+  font-weight: 600;
+  white-space: nowrap;
+  width: 100%;
+ }
+.flow-icon {
+   width: 24px; 
+   height: 24px; 
+   border-radius: 999px; 
+   display: inline-flex; 
+   align-items: center; 
+   justify-content: center; 
+   font-size: 12px;
+  }
+.flow-icon.in { 
+  background: var(--income-soft); color: var(--income); 
+}
+.flow-icon.out { 
+  background: var(--expense-soft); 
+  color: var(--expense); 
+}
+
+.value-flow.in {
+   color: var(--income);
+   }
+
+.value-flow.out { 
+  color: var(--expense);
+ }
 
 /* Ações ao lado das linhas da tabela principal */
 .row-actions { display: flex; justify-content: flex-end; gap: 4px; }
@@ -279,7 +335,7 @@ td.right { text-align: right; }
   color: var(--muted-foreground); 
   font-size: 13px;
 }
-.row-actions button:hover { background: rgba(255, 255, 255, 0.05); color: var(--foreground); }
+.row-actions button:hover { background: rgba(0, 0, 0, 0.05); color: var(--foreground); }
 .row-actions button.del { color: var(--expense); }
 
 .empty { text-align: center; padding: 40px 16px; color: var(--muted-foreground); font-size: 13px; }
@@ -425,7 +481,9 @@ td.right { text-align: right; }
     box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
   }
   .cat-item.active { border-color: var(--primary); }
-  .cat-item .actions { opacity: 1; }
+  
+  /* Mantém as ações sempre visíveis no mobile (já que não há hover com mouse) */
+  .cat-item .actions { opacity: 1; max-width: 60px; } 
   .cat-item .name { max-width: 220px; }
   .cat-item .actions button { width: 24px; height: 24px; }
   .aside-divider { margin: 14px 0; }
@@ -433,7 +491,13 @@ td.right { text-align: right; }
   .panel { border-radius: 14px; }
   .panel-head { align-items: stretch; padding: 14px; }
   .panel-head .search { width: 100%; }
-  .table-scroll { border-top: 1px solid var(--border); }
+  
+  /* 📱 ROLLER ATIVADO APENAS NO MOBILE: Permite deslizar a tabela horizontalmente em telas pequenas */
+  .table-scroll { 
+    border-top: 1px solid var(--border); 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
+  }
   table { min-width: 790px; }
   thead th, tbody td { padding: 10px 12px; }
 
