@@ -171,7 +171,7 @@ export default function MetasPage() {
       {/* 1. CABEÇALHO DA PÁGINA */}
       <header className="metas-header">
         <div className="metas-header__texto">
-          <h1 className="metas-header__titulo">Metas Financeiras</h1>
+          <h1 className="metas-header__titulo">Metas Mensais</h1>
           <p className="metas-header__subtitulo">
             Defina tetos de gastos por categoria para manter seu orçamento sob controle.
           </p>
