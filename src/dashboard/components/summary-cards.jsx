@@ -41,13 +41,13 @@ export function SummaryCards() {
       }
       
       try {
-        setCarregando(true);
-        
-        const [respostaContas, respostaTransacoes, respostaMetas] = await Promise.all([
-          axios.get(`http://localhost:8080/api/v1/contas-bancarias/usuario/${usuarioId}`),
-          axios.get(`http://localhost:8080/api/v1/transacoes/usuario/${usuarioId}`),
-          axios.get(`http://localhost:8080/api/v1/metas-financeiras/usuario/${usuarioId}`)
-        ]);
+      setCarregando(true);
+      
+      const [respostaContas, respostaTransacoes, respostaMetas] = await Promise.all([
+        axios.get(`${API_URL}/api/v1/contas-bancarias/usuario/${usuarioId}`),
+        axios.get(`${API_URL}/api/v1/transacoes/usuario/${usuarioId}`),
+        axios.get(`${API_URL}/api/v1/metas-financeiras/usuario/${usuarioId}`)
+      ]);
 
         const contas = respostaContas.data || [];
         const transacoes = respostaTransacoes.data || [];
