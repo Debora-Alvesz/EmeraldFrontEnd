@@ -7,6 +7,7 @@ import { CashflowChart } from "../components/cashflow-chart"
 import { CategoryChart } from "../components/category-chart"
 import { TransactionsTable } from "../components/transactions-table"
 import ContasPage from "../../conta/pages/contas-page.jsx"
+import TransacoesPage from "../../transacoes/pages/transacoesPage.jsx"
 import AdminUsersPage from "./admin-users-page.jsx"
 
 export default function DashboardPage({ onLogout }) {
@@ -50,10 +51,12 @@ export default function DashboardPage({ onLogout }) {
             </>
           ) : currentTab === "contas" ? (
             <ContasPage />
+          ) : currentTab === "categorias" ? (
+            <TransacoesPage />
           ) : currentTab === "usuarios-admin" ? (
             <AdminUsersPage />
           ) : (
-            /* 🖥️ Placeholder para as próximas telas (Transações, Metas, Perfil, etc) */
+            /* 🖥️ Placeholder para as próximas telas (Metas, Perfil, etc) */
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed border-gray-200 rounded-2xl bg-white p-8 text-center shadow-sm">
               <p className="text-base font-semibold text-gray-800 capitalize">
                 Tela de {currentTab}

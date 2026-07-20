@@ -55,7 +55,7 @@ export function Sidebar({ open, onClose, currentTab, onTabChange, onLogout }) {
 
       {/* Menu Lateral Estruturado com os Tokens do Design System (@theme inline) */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:translate-x-0 lg:h-screen lg:sticky lg:top-0
+        fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:translate-x-0 lg:h-screen lg:sticky lg:top-0 lg:w-72
         ${open ? "translate-x-0" : "-translate-x-full"}
       `}>
         
@@ -85,14 +85,14 @@ export function Sidebar({ open, onClose, currentTab, onTabChange, onLogout }) {
                   onClose(); 
                 }}
                 // Alternância automática de estados visuais baseada na propriedade 'currentTab' ativa
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                className={`flex w-full items-center justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                   active 
                     ? "bg-sidebar-accent text-sidebar-accent-foreground" 
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${active ? "text-sidebar-accent-foreground" : "text-muted-foreground"}`} />
-                {item.label}
+                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-sidebar-accent-foreground" : "text-muted-foreground"}`} />
+                <span className="whitespace-nowrap">{item.label}</span>
               </button>
             );
           })}
@@ -108,14 +108,14 @@ export function Sidebar({ open, onClose, currentTab, onTabChange, onLogout }) {
                   onTabChange("usuarios-admin");
                   onClose();
                 }}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                className={`flex w-full items-center justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                   currentTab === "usuarios-admin"
                     ? "bg-rose-50 text-destructive border-rose-100"
                     : "text-sidebar-foreground hover:bg-rose-50 hover:text-destructive"
                 }`}
               >
-                <Users className={`h-4 w-4 ${currentTab === "usuarios-admin" ? "text-destructive" : "text-muted-foreground"}`} />
-                Gerenciar Usuários
+                <Users className={`h-4 w-4 shrink-0 ${currentTab === "usuarios-admin" ? "text-destructive" : "text-muted-foreground"}`} />
+                <span className="whitespace-nowrap">Gerenciar Usuários</span>
               </button>
             </div>
           )}
@@ -124,10 +124,10 @@ export function Sidebar({ open, onClose, currentTab, onTabChange, onLogout }) {
         <div className="border-t border-sidebar-border p-4 mt-0 lg:mt-auto">
           <button
             onClick={onLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-rose-50 hover:text-destructive transition-colors cursor-pointer"
+            className="flex w-full items-center justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-rose-50 hover:text-destructive transition-colors cursor-pointer"
           >
-            <LogOut className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-            Sair do Sistema
+            <LogOut className="h-4 w-4 shrink-0 text-muted-foreground hover:text-destructive" />
+            <span className="whitespace-nowrap">Sair do Sistema</span>
           </button>
         </div>
       </aside>

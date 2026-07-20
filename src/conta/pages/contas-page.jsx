@@ -24,6 +24,7 @@ import {
   Trash2,
   Receipt,
   ArrowUpRight,
+  ArrowDownRight,
   Inbox,
   Layers,
 } from "lucide-react";
@@ -36,8 +37,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { Badge } from "../../../components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "../../../components/ui/sheet";
+import { API_URL } from "../../infrastructure/config/api";
 
-import "./contas-page.css";
+import "../styles/contas-page.css";
 
 // Mapeamento dos 4 tipos de conta do Enum do backend -> ícone + rótulo + cor.
 // IMPORTANTE: "cor" aqui referencia as classes .cor-* definidas no CSS,
@@ -59,12 +61,13 @@ const MESES = [
   { value: "11", label: "Novembro" }, { value: "12", label: "Dezembro" },
 ];
 
-// Badge de cada tipo de conta no card — mantém as cores do tema (primary/info/etc)
+// Badge de cada tipo de conta no card — mesma cor da barra de composição,
+// com fundo branco para não colorir o interior do badge.
 const CORES_BADGE_TIPO = {
-  CORRENTE: "bg-primary/10 text-primary border-primary/20",
-  POUPANCA: "bg-info/10 text-info border-info/20",
-  INVESTIMENTO: "bg-muted text-muted-foreground border-border",
-  ESPECIE: "bg-amber-50 text-amber-700 border-amber-200",
+  CORRENTE: "bg-white text-[#10B981] border-[#10B981]",
+  POUPANCA: "bg-white text-[#3B82F6] border-[#3B82F6]",
+  INVESTIMENTO: "bg-white text-[#8B5CF6] border-[#8B5CF6]",
+  ESPECIE: "bg-white text-[#F59E0B] border-[#F59E0B]",
 };
 
 const DATA_ATUAL = new Date();
@@ -144,7 +147,7 @@ export default function ContasPage() {
     }
     try {
       setCarregando(true);
-      const response = await axios.get(`http://localhost:8080/api/v1/contas-bancarias/usuario/${usuarioId}`);
+      const response = await axios.get(`${API_URL}/api/v1/contas-bancarias/usuario/${usuarioId}`);
       const payload = response.data;
       const contasRetornadas = Array.isArray(payload)
         ? payload
@@ -167,9 +170,13 @@ export default function ContasPage() {
   const carregarExtratoDaAPI = async (contaId, mes, ano) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/v1/contas-bancarias/${contaId}/usuario/${usuarioId}/extrato?mes=${mes}&ano=${ano}`
+        `${API_URL}/api/v1/contas-bancarias/${contaId}/usuario/${usuarioId}/extrato?mes=${mes}&ano=${ano}`
       );
-      setLinhasExtrato(response.data);
+      const payload = response.data;
+      const linhas = Array.isArray(payload)
+        ? payload
+        : payload?.extrato || payload?.data || payload?.content || payload?.transacoes || [];
+      setLinhasExtrato(linhas);
     } catch (error) {
       console.error("Erro ao carregar extrato:", error);
     }
@@ -243,9 +250,9 @@ export default function ContasPage() {
 
     try {
       if (contaEmEdicao) {
-        await axios.put(`http://localhost:8080/api/v1/contas-bancarias/${contaEmEdicao.id}/usuario/${usuarioId}`, payload);
+        await axios.put(`${API_URL}/api/v1/contas-bancarias/${contaEmEdicao.id}/usuario/${usuarioId}`, payload);
       } else {
-        await axios.post("http://localhost:8080/api/v1/contas-bancarias", payload);
+        await axios.post(`${API_URL}/api/v1/contas-bancarias`, payload);
       }
       buscarContasDoBanco(); // Recarrega a lista do banco após salvar
       fecharModal();
@@ -259,7 +266,7 @@ export default function ContasPage() {
     if (!window.confirm(`Tem certeza que deseja excluir a conta "${conta.nomeConta}"?`)) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/v1/contas-bancarias/${conta.id}/usuario/${usuarioId}`);
+      await axios.delete(`${API_URL}/api/v1/contas-bancarias/${conta.id}/usuario/${usuarioId}`);
       buscarContasDoBanco();
       if (contaSelecionada?.id === conta.id) {
         setExtratoAberto(false);
@@ -351,17 +358,6 @@ export default function ContasPage() {
                 {TIPOS_CONTA.map((tipo) => (
                   <span key={tipo.value} className="flex items-center gap-1.5">
                     <span className={`h-2 w-2 flex-shrink-0 rounded-full ${tipo.corClasse}`} />
-                    {tipo.label}
-                  </span>
-                ))}
-              </div>
-
-              {/* Legenda: sempre mostra os 4 tipos, mesmo com saldo zero,
-                  para deixar claro qual cor pertence a qual tipo de conta */}
-              <div className="composicao__legenda">
-                {TIPOS_CONTA.map((tipo) => (
-                  <span key={tipo.value} className="composicao__legenda-item">
-                    <span className={`composicao__dot ${tipo.cor}`} />
                     {tipo.label}
                   </span>
                 ))}
@@ -476,20 +472,11 @@ export default function ContasPage() {
 
      {/* Painel lateral de extrato mensal. */}
       <Sheet open={extratoAberto} onOpenChange={setExtratoAberto}>
-        {/* 
-          AJUSTES DE RESPONSIVIDADE:
-          - w-full: No celular (telas pequenas), o painel ocupa 100% da largura.
-          - sm:max-w-md: Em telas médias/grandes, ele trava na largura de uma gaveta (max 448px).
-          - flex flex-col h-full: Transforma o painel numa coluna de altura total, 
-            permitindo que o cabeçalho fique fixo no topo e apenas a lista role.
-          - p-4 sm:p-6: Padding menor no celular para aproveitar espaço, maior no desktop.
-        */}
-        <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-4 sm:p-6 bg-card border-border shadow-2xl z-50">
+        <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-4 sm:p-6 bg-card border-border shadow-2xl z-50 overflow-visible">
           {contaSelecionada && (
             <>
-              {/* CABEÇALHO COM BOTÃO VOLTAR */}
-              <div className="flex items-start gap-3">
-                {/* Botão Voltar: Visível no mobile e desktop, ótimo para UX */}
+              {/* CABEÇALHO COM BOTÃO VOLTAR (shrink-0 impede que ele seja espremido) */}
+              <div className="flex items-start gap-3 shrink-0">
                 <button 
                   onClick={() => setExtratoAberto(false)}
                   className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
@@ -498,7 +485,6 @@ export default function ContasPage() {
                   <ArrowLeft className="h-4.5 w-4.5" />
                 </button>
 
-                {/* sheet-header nativo reajustado para alinhar à esquerda ao lado do botão */}
                 <SheetHeader className="text-left flex-1 mt-0">
                   <SheetTitle className="flex items-center gap-2 text-xl">
                     <Receipt className="h-5 w-5 text-primary shrink-0" />
@@ -510,78 +496,101 @@ export default function ContasPage() {
                 </SheetHeader>
               </div>
 
-              {/* ÁREA ROLÁVEL: Garante que os filtros e a lista rolem, mas o topo fique fixo */}
-              <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-6">
-                
-                {/* Filtros em Grid - Adaptável */}
-                <div className="extrato-filtros grid grid-cols-2 gap-3">
-                  <div className="form-field flex flex-col gap-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">Mês de Análise</Label>
-                    <Select
-                      value={filtroMes}
-                      onValueChange={(v) => {
-                        setFiltroMes(v);
-                        carregarExtratoDaAPI(contaSelecionada.id, v, filtroAno);
-                      }}
+              {/* FILTROS FIXOS NO TOPO
+                  Adicionamos "relative z-20" para garantir que flutuem SOBRE a lista
+                  e tiramos de dentro do bloco com overflow-y-auto */}
+              <div className="extrato-filtros grid grid-cols-2 gap-3 mt-6 shrink-0 relative z-20">
+                <div className="form-field flex flex-col gap-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Mês de Análise</Label>
+                  <Select
+                    value={filtroMes}
+                    onValueChange={(v) => {
+                      setFiltroMes(v);
+                      carregarExtratoDaAPI(contaSelecionada.id, v, filtroAno);
+                    }}
+                  >
+                    <SelectTrigger className="h-10 rounded-lg bg-background border-input">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      align="start"
+                      // Mudamos de max-h-64 para max-h-[400px] para caberem todos os 12 meses sem cortar
+                      className="z-[120] max-h-[400px] w-full bg-card border-border"
                     >
-                      <SelectTrigger className="h-10 rounded-lg bg-background border-input">
-                        <SelectValue />
-                      </SelectTrigger>
-                      {/* position="popper" garante que não vai bugar no mobile */}
-                      <SelectContent position="popper" className="z-[100] max-h-64 bg-card border-border">
-                        {MESES.map((mes) => (
-                          <SelectItem key={mes.value} value={mes.value}>
-                            {mes.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="form-field flex flex-col gap-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">Ano de Análise</Label>
-                    <Input
-                      type="number"
-                      value={filtroAno}
-                      className="h-10 rounded-lg bg-background border-input"
-                      onChange={(e) => {
-                        setFiltroAno(e.target.value);
-                        if (e.target.value.length === 4) {
-                          carregarExtratoDaAPI(contaSelecionada.id, filtroMes, e.target.value);
-                        }
-                      }}
-                    />
-                  </div>
+                      {MESES.map((mes) => (
+                        <SelectItem key={mes.value} value={mes.value}>
+                          {mes.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Lista de Resultados */}
-                <div>
-                  {linhasExtrato.length === 0 ? (
-                    <div className="empty-state empty-state--extrato flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-border bg-muted/30">
-                      <Inbox className="h-8 w-8 text-muted-foreground/60" />
-                      <p className="mt-3 text-sm font-medium text-muted-foreground text-center">
-                        Nenhum registro retornado
-                      </p>
-                      <p className="mt-1 max-w-[200px] text-xs text-muted-foreground/80 text-center">
-                        O método Java precisa realizar o mapeamento físico.
-                      </p>
-                    </div>
-                  ) : (
-                    <ul className="extrato-lista divide-y divide-border rounded-xl border border-border bg-background overflow-hidden">
-                      {linhasExtrato.map((linha, index) => (
-                        <li key={index} className="extrato-item flex items-center justify-between gap-3 px-4 py-3">
+                <div className="form-field flex flex-col gap-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Ano de Análise</Label>
+                  <Input
+                    type="number"
+                    value={filtroAno}
+                    className="h-10 rounded-lg bg-background border-input"
+                    onChange={(e) => {
+                      setFiltroAno(e.target.value);
+                      if (e.target.value.length === 4) {
+                        carregarExtratoDaAPI(contaSelecionada.id, filtroMes, e.target.value);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* ÁREA ROLÁVEL: Agora apenas a lista ou o empty state tem scroll, 
+                  evitando o recorte (clip) no dropdown dos filtros logo acima */}
+              <div className="flex-1 overflow-y-auto mt-6 pr-2">
+                {linhasExtrato.length === 0 ? (
+                  <div className="empty-state empty-state--extrato flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-border bg-muted/30">
+                    <Inbox className="h-8 w-8 text-muted-foreground/60" />
+                    <p className="mt-3 text-sm font-medium text-muted-foreground text-center">
+                      Nenhum registro retornado
+                    </p>
+                    <p className="mt-1 max-w-[200px] text-xs text-muted-foreground/80 text-center">
+                      Não há registros nesse período.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="extrato-lista divide-y divide-border rounded-xl border border-border bg-background overflow-hidden relative z-0">
+                    {linhasExtrato.map((transacao) => {
+                      const isDespesa = Number(transacao.valor) < 0; 
+                      
+                      return (
+                        <li key={transacao.id} className="extrato-item flex items-center justify-between gap-3 px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <span className="extrato-item__icone flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                            <span className={`extrato-item__icone flex h-8 w-8 items-center justify-center rounded-full ${isDespesa ? 'bg-red-100' : 'bg-emerald-100'}`}>
+                              {isDespesa ? (
+                                <ArrowDownRight className="h-4 w-4 text-red-600" />
+                              ) : (
+                                <ArrowUpRight className="h-4 w-4 text-emerald-600" />
+                              )}
                             </span>
-                            <p className="text-sm font-medium text-foreground">{String(linha)}</p>
+                            
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                {transacao.descricao || transacao.nomeCategoria}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(transacao.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className={`text-sm font-bold ${isDespesa ? 'text-red-600' : 'text-emerald-600'}`}>
+                            {Number(transacao.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                           </div>
                         </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             </>
           )}
@@ -594,9 +603,10 @@ export default function ContasPage() {
 function CardConta({ conta, onEditar, onExcluir, onVerExtrato }) {
   const tipoInfo = TIPOS_CONTA.find((t) => t.value === conta.tipoConta) || TIPOS_CONTA[0];
   const IconeConta = conta.tipoConta === "ESPECIE" ? Wallet : Landmark;
+  const tipoClasse = conta.tipoConta.toLowerCase().replace("ç", "c");
 
   return (
-    <Card className="conta-card">
+    <Card className={`conta-card conta-card--${tipoClasse}`}>
       <CardHeader className="conta-card__header">
         <div className="flex items-center gap-3">
           <span className="conta-card__icone">
