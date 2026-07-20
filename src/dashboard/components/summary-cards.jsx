@@ -15,6 +15,8 @@ import {
   Activity
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 export function SummaryCards() {
   const [usuarioId] = useState(() => {
     if (typeof window !== "undefined") {
