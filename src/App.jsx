@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import AuthPage from "./usuario/pages/auth-page.jsx"
-import DashboardPage from "./dashboard/pages/dashboard-page.jsx" // 👈 Importando o seu novo Dashboard
+import DashboardPage from "./dashboard/pages/dashboard-page.jsx" 
 import "./infrastructure/assets/css/global/elements.css"
 
 function App() {

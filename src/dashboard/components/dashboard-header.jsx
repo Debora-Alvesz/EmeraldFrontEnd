@@ -6,8 +6,8 @@ export function DashboardHeader({ onMenuClick }) {
   const [userInitial, setUserInitial] = useState("U")
   const [userEmail, setUserEmail] = useState("executivo@emerald.com")
 
-  // URL Base do seu Spring Boot
-  const API_BASE_URL = "http://localhost:8080"
+  // lendo o .env primeiro, e usando localhost só de backup
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
   useEffect(() => {
     const usuarioLogadoString = localStorage.getItem("usuarioLogado")
