@@ -4,11 +4,6 @@
  * Módulo de Gestão de Contas Bancárias e Carteiras.
  * Centraliza o fluxo de listagem, criação, edição e exclusão de contas.
  * INTEGRADO: Busca automática de dados reais do backend via HTTP Axios.
- *
- * Estilos: os utilitários do Tailwind foram organizados em classes
- * semânticas dentro de "./contas-page.css" (ex.: .conta-card,
- * .icon-btn--editar). Isso evita strings gigantes de className no JSX
- * e deixa mais fácil ajustar o visual em um único arquivo.
  */
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -46,10 +41,10 @@ import "../styles/contas-page.css";
 // usadas tanto na barra de composição quanto na legenda, para as cores
 // nunca ficarem desencontradas entre os dois lugares.
 const TIPOS_CONTA = [
-  { value: "CORRENTE", label: "Corrente", icon: Landmark, corClasse: "bg-[#10B981]" }, // Esmeralda
-  { value: "POUPANCA", label: "Poupança", icon: PiggyBank, corClasse: "bg-[#3B82F6]" }, // Azul
-  { value: "INVESTIMENTO", label: "Investimento", icon: TrendingUp, corClasse: "bg-[#8B5CF6]" }, // Roxo
-  { value: "ESPECIE", label: "Dinheiro em Espécie", icon: Wallet, corClasse: "bg-[#F59E0B]" }, // Âmbar
+  { value: "CORRENTE", label: "Corrente", icon: Landmark, corClasse: "bg-[#10B981]" }, 
+  { value: "POUPANCA", label: "Poupança", icon: PiggyBank, corClasse: "bg-[#3B82F6]" }, 
+  { value: "INVESTIMENTO", label: "Investimento", icon: TrendingUp, corClasse: "bg-[#8B5CF6]" }, 
+  { value: "DINHEIRO", label: "Dinheiro", icon: Wallet, corClasse: "bg-[#F59E0B]" },
 ];
 
 const MESES = [
@@ -67,7 +62,7 @@ const CORES_BADGE_TIPO = {
   CORRENTE: "bg-white text-[#10B981] border-[#10B981]",
   POUPANCA: "bg-white text-[#3B82F6] border-[#3B82F6]",
   INVESTIMENTO: "bg-white text-[#8B5CF6] border-[#8B5CF6]",
-  ESPECIE: "bg-white text-[#F59E0B] border-[#F59E0B]",
+  DINHEIRO: "bg-white text-[#F59E0B] border-[#F59E0B]", 
 };
 
 const DATA_ATUAL = new Date();
@@ -602,7 +597,7 @@ export default function ContasPage() {
 
 function CardConta({ conta, onEditar, onExcluir, onVerExtrato }) {
   const tipoInfo = TIPOS_CONTA.find((t) => t.value === conta.tipoConta) || TIPOS_CONTA[0];
-  const IconeConta = conta.tipoConta === "ESPECIE" ? Wallet : Landmark;
+  const IconeConta = conta.tipoConta === "DINHEIRO" ? Wallet : Landmark; 
   const tipoClasse = conta.tipoConta.toLowerCase().replace("ç", "c");
 
   return (
