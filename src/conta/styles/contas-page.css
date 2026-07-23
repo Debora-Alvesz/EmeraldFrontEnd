@@ -139,7 +139,7 @@
 .conta-card--corrente { border-color: #10B981; }
 .conta-card--poupanca { border-color: #3B82F6; }
 .conta-card--investimento { border-color: #8B5CF6; }
-.conta-card--especie { border-color: #F59E0B; }
+.conta-card--dinheiro { border-color: #F59E0B; }
 
 .conta-card__header,
 .conta-card__footer {
@@ -311,7 +311,7 @@
   @apply bg-purple-500; 
   background: #6b7280 !important; 
 }
-.cor-especie { 
+.cor-dinheiro { 
   @apply bg-amber-500; 
   background: #f59e0b !important; 
 }
